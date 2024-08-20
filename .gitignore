@@ -3,3 +3,4 @@
 *.tfstate.backup
 .DS_Store
 *.log
+google-cred.json
