@@ -1,17 +1,15 @@
-# Define the Kubernetes Namespace for Atlantis
 resource "kubernetes_namespace" "atlantis" {
   metadata {
-    name = "atlantis"
+    name = var.namespace
   }
 }
 
-# Deploy Atlantis using the Helm Chart
 resource "helm_release" "atlantis" {
   name       = "atlantis"
   namespace  = kubernetes_namespace.atlantis.metadata[0].name
   chart      = "atlantis"
   repository = "https://helm.releases.hashicorp.com"
-  version    = "4.2.0"  # Use the appropriate version
+  version    = "4.2.0"  
 
   values = [
     <<EOF
@@ -36,7 +34,7 @@ resource "helm_release" "atlantis" {
 
   set {
     name  = "ingress.hosts[0].name"
-    value = "atlantis.your-domain.com"  # Replace with your domain
+    value = "atlantis.your-domain.com"  
   }
 
   set {
@@ -45,17 +43,11 @@ resource "helm_release" "atlantis" {
   }
 
   set {
-    name  = "environment.AWS_DEFAULT_REGION"
-    value = "us-west-2"
-  }
-
-  set {
     name  = "vcsSecretName"
-    value = "atlantis-vcs"  # You'll need to set up this Kubernetes secret
+    value = "atlantis-vcs"  
   }
 
   depends_on = [
-    google_container_cluster.primary,
-    kubernetes_namespace.atlantis
+    var.cluster_name
   ]
 }

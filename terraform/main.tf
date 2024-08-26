@@ -1,26 +1,23 @@
 resource "google_container_cluster" "primary" {
   name     = "gke-cluster"
-  location = "us-central1"
+  location = var.region
   initial_node_count = 1
 
   node_config {
     machine_type = "e2-medium"
   }
+
+  deletion_protection = false
 }
 
 resource "google_container_node_pool" "primary_nodes" {
   cluster = google_container_cluster.primary.name
   location = google_container_cluster.primary.location
-  node_count = 3
+  node_count = 1
 
   node_config {
     machine_type = "e2-medium"
   }
-}
-
-resource "google_container_cluster" "primary" {
-  name     = "gke-cluster"
-  location = "us-central1"
 }
 
 resource "kubernetes_namespace" "atlantis" {
@@ -30,5 +27,7 @@ resource "kubernetes_namespace" "atlantis" {
 }
 
 module "atlantis" {
-  source = "./modules/atlantis"
+  source      = "./modules/atlantis"
+  cluster_name = google_container_cluster.primary.name
+  namespace   = "atlantis" 
 }
